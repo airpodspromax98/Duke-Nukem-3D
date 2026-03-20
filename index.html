@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0.0, viewport-fit=cover">
+    <title>Clever | Portal</title>
+
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/wZKh3RtG/favicon.jpg">
+    
+    <base href="https://cdn.jsdelivr.net/gh/Stinkalistic/UGS@main/MISC/dukenukem3d/">
+
+    <style>
+        /* 1. RESET & THEME */
+        body, html {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100%;
+            height: 100%;
+            overflow: hidden !important;
+            background-color: #000000 !important;
+            font-family: Arial, sans-serif;
+            color: #ccc;
+        }
+
+        /* 2. THE TOP BAR - FORCED PURE WHITE */
+        #topbar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 60px !important;
+            background-color: #ffffff !important; 
+            background: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 15px !important;
+            z-index: 1000000 !important;
+            box-sizing: border-box !important;
+            border: none !important;
+        }
+
+        #topbar img {
+            height: 40px !important;
+            margin-right: 12px !important;
+        }
+
+        #topbar a {
+            color: #000000 !important;
+            text-decoration: none !important;
+            font-size: 20px !important;
+            font-weight: 500 !important;
+        }
+
+        /* 3. GAME AREA SETUP */
+        #game-container {
+            position: absolute !important;
+            top: 60px !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100% - 60px) !important;
+            display: flex;
+            justify-content: center;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: 100%;
+            outline: none;
+        }
+
+        /* UI Overlays */
+        .info-overlay {
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            z-index: 10;
+        }
+
+        #spinner {
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 15px;
+            border-top: 2px solid #222;
+            border-right: 2px solid #222;
+            border-bottom: 2px solid #222;
+            border-left: 2px solid #867ae0;
+            animation: page-loader 1.1s infinite linear;
+        }
+
+        @keyframes page-loader { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); }
+        }
+
+        #select-version a {
+            background: #ffffff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="topbar">
+        <img src="https://lh3.googleusercontent.com/a-/ALV-UjWQneu0wwz9oqOIrJuC-rEk16wbmHPB_n6DEY2AUPRoiQYTQZs=s240-p-k-rw-no" alt="Logo">
+        <a href="https://sites.google.com/view/bobsgwebsite/home">Clever | Portal</a>
+    </div>
+
+    <div id="game-container">
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+        <div class="info-overlay" id="loading" style="display:none;">
+            <div id="spinner"></div>
+            <div id="status">Downloading...</div>
+            <progress value="0" max="100" id="progress" hidden="1"></progress>  
+        </div>
+
+        <div class="info-overlay" id="select-version">
+            <a href="#" id="load">CLICK TO LOAD DUKE 3D</a>
+            <p>~19mb download</p>
+        </div>
+    </div>
+
+    <script type='text/javascript'>
+        // 4. MOUSE LOCK / 360 SPIN FIX
+        const canvas = document.getElementById('canvas');
+        canvas.addEventListener("mousedown", () => {
+            canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+            canvas.requestPointerLock();
+        });
+
+        var loadScript = (ev, src) => {
+            ev.preventDefault();
+            document.getElementById('select-version').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            var s = document.createElement('script');
+            s.setAttribute('src', src);
+            document.head.appendChild(s);
+        };
+
+        document.getElementById('load').addEventListener('click', (ev) => loadScript(ev, 'index.js'));
+
+        var statusElement = document.getElementById('status');
+        var progressElement = document.getElementById('progress');
+        var spinnerElement = document.getElementById('spinner');
+
+        var Module = {
+            preRun: [],
+            postRun: [],
+            canvas: canvas,
+            setStatus: (text) => {
+                if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+                if (text === Module.setStatus.last.text) return;
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                if (m) {
+                    progressElement.value = parseInt(m[2])*100;
+                    progressElement.max = parseInt(m[4])*100;
+                    progressElement.hidden = false;
+                } else if (!text) {
+                    document.getElementById('loading').style.display = 'none';
+                }
+                statusElement.innerHTML = text;
+            }
+        };
+    </script>
+</body>
+</html>
